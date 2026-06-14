@@ -1,0 +1,27 @@
+﻿# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Docker
+*.pid
+
+# Data
+*.json
+*.csv
+*.parquet
+
+# Temp
+temp/
+tmp/
