@@ -1,5 +1,6 @@
 import json
 import psycopg2
+import re
 
 # Читаем JSON с правильной обработкой
 with open('rts_index.json', 'r', encoding='utf-8') as f:
@@ -8,9 +9,9 @@ with open('rts_index.json', 'r', encoding='utf-8') as f:
 # Парсим JSON (несмотря на странные символы)
 try:
     data = json.loads(content)
-except:
+except Exception:
     # Если не парсится, пробуем игнорировать ошибки
-    import re
+    
     content_clean = re.sub(r'[^\x00-\x7F]+', ' ', content)
     data = json.loads(content_clean)
 
