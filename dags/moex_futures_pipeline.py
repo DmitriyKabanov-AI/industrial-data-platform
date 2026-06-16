@@ -5,22 +5,39 @@ from datetime import datetime, timedelta
 from io import BytesIO
 from minio import Minio
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.operators.python_operator import PythonOperator
 import psycopg2
 from psycopg2.extras import execute_values
 
 # === Настройки ===
-MINIO_ENDPOINT = "minio:9000"
-MINIO_ACCESS_KEY = os.getenv("MINIO_ROOT_USER", "minioadmin")
-MINIO_SECRET_KEY = os.getenv("MINIO_ROOT_PASSWORD", "minioadmin")
-BUCKET_RAW = "bronze"
+MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT")
+MINIO_ACCESS_KEY = os.getenv("MINIO_ROOT_USER")
+MINIO_SECRET_KEY = os.getenv("MINIO_ROOT_PASSWORD")
+BUCKET_RAW = os.getenv("BUCKET_RAW")
 
-PG_HOST = "postgres_data"
-PG_PORT = 5432
-PG_USER = "postgres"
-PG_PASSWORD = "postgres"
-PG_DATABASE = "moex"
+PG_HOST = os.getenv("PG_HOST")
+PG_PORT = int(os.getenv("PG_PORT", "5432"))  # порт можно оставить с дефолтом
+PG_USER = os.getenv("PG_USER")
+PG_PASSWORD = os.getenv("PG_PASSWORD")
+PG_DATABASE = os.getenv("PG_DATABASE")
 
+# Проверка, что все переменные загружены
+required_vars = {
+    "MINIO_ENDPOINT": MINIO_ENDPOINT,
+    "MINIO_ROOT_USER": MINIO_ACCESS_KEY,
+    "MINIO_ROOT_PASSWORD": MINIO_SECRET_KEY,
+    "BUCKET_RAW": BUCKET_RAW,
+    "PG_HOST": PG_HOST,
+    "PG_USER": PG_USER,
+    "PG_PASSWORD": PG_PASSWORD,
+    "PG_DATABASE": PG_DATABASE,
+}
+
+missing = [key for key, value in required_vars.items() if value is None]
+if missing:
+    raise ValueError(f"❌ Отсутствуют обязательные переменные окружения: {', '.join(missing)}")
+
+print(f"✅ Настройки загружены: MinIO={MINIO_ENDPOINT}, PG_HOST={PG_HOST}")
 
 def fetch_and_upload_moex(**context):
     """Загружает данные по годам и склеивает"""
